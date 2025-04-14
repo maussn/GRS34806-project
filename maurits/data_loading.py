@@ -100,7 +100,7 @@ def build_seq_array(lines: list, num_steps: int, non_aa_num: int=20) -> torch.te
     :return: tensor with truncated/padded tokenized sequences
     :rtype: torch.tensor
     """    
-    return torch.tensor([truncate_pad(l, num_steps, non_aa_num) for l in lines])
+    return torch.tensor([truncate_pad(l, num_steps, non_aa_num) for l in lines], dtype=torch.float32)
 
 
 def load_array(data_arrays: tuple[torch.tensor, torch.tensor], batch_size: int, is_train: bool=True) -> torch.utils.data.DataLoader:
@@ -127,23 +127,22 @@ def load_data(batch_size: int, num_steps: int, dataset: tuple[list, list]) -> to
     seq,lab = dataset
     seq = tokenize(seq, mapaa2num)
     seq_array = build_seq_array(seq, num_steps)
-    data_arrays = (seq_array, torch.tensor(lab))
+    data_arrays = (seq_array, torch.tensor(lab, dtype=torch.long))
     data_iter = load_array(data_arrays, batch_size)
     return data_iter
 
-# # Usecase:
+
 # batch_size = 5
-# num_steps = 10
+# num_steps = 500
 
 # # Example for one of the simulated datasets
 # datalist, labellist = read("len100_200_n1000.seq", "len100_200_n1000.pos")
-# traindata, trainlabels, testdata, testlabels = generate_train_test(datalist, labellist)
-# traindataset = (traindata, trainlabels)
-# testdataset = (testdata, testlabels)
+# traindatalist, trainlabellist, testdatalist, testlabellist = generate_train_test(datalist, labellist)
+# traindataset = [traindatalist, trainlabellist]
+# testdataset = [testdatalist, testlabellist]
 
 # # Set batch_size and num_steps (maximum sequence length)
 # train_iter = load_data(batch_size, num_steps, traindataset)
 # test_iter = load_data(batch_size, num_steps, testdataset)
 
-# # Do something with the data loaders
 # print(next(iter(train_iter)))
